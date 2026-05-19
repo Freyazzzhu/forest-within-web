@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forest Within</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="phone-shell" aria-live="polite">
+      <div class="forest-bg" aria-hidden="true">
+        <span class="branch branch-a"></span>
+        <span class="branch branch-b"></span>
+        <span class="branch branch-c"></span>
+        <span class="mist mist-a"></span>
+        <span class="mist mist-b"></span>
+        <span class="color-mark mark-a"></span>
+        <span class="color-mark mark-b"></span>
+        <span class="color-mark mark-c"></span>
+      </div>
+
+      <header class="topbar">
+        <span class="signal-dot"></span>
+        <span>Forest Within</span>
+        <span class="step-count" id="stepCount">01 / 07</span>
+      </header>
+
+      <section class="screen is-active" data-screen="welcome">
+        <div class="screen-content welcome-layout">
+          <p class="eyebrow">A quiet place to arrive</p>
+          <h1 class="welcome-title">
+            <span>Welcome to</span>
+            <strong>Forest Within</strong>
+          </h1>
+          <button class="primary-action" type="button" data-next="emotion">
+            Begin
+          </button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="emotion">
+        <div class="screen-content">
+          <h2 class="single-line-title">How is going?</h2>
+          <label class="emotion-box">
+            <span>Your words</span>
+            <textarea
+              id="emotionInput"
+              rows="5"
+              maxlength="160"
+              placeholder="A word, a sentence, or a feeling that is still forming."
+            ></textarea>
+          </label>
+          <div class="chips" aria-label="Suggested feelings">
+            <button type="button" data-chip="A little tired">A little tired</button>
+            <button type="button" data-chip="Need stillness">Need stillness</button>
+            <button type="button" data-chip="Quietly happy">Quietly happy</button>
+            <button type="button" data-chip="Thinking of someone">Thinking of someone</button>
+            <button type="button" data-chip="Hard to explain">Hard to explain</button>
+            <button type="button" data-chip="Anxious">Anxious</button>
+            <button type="button" data-chip="Calm">Calm</button>
+            <button type="button" data-chip="Expectant">Expectant</button>
+          </div>
+          <button class="primary-action" type="button" id="generateButton">
+            Step into Forest
+          </button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="generating">
+        <div class="screen-content center">
+          <div class="pulse-orbit" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <p class="eyebrow">The forest is listening softly</p>
+          <h2>A place is opening for you</h2>
+          <p class="lead">
+            Your words are becoming color, wing, and a quiet pattern of their
+            own.
+          </p>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="butterfly">
+        <div class="screen-content">
+          <h2>Your butterfly<br />is here</h2>
+          <div class="butterfly-stage" aria-label="Generated butterfly preview">
+            <div class="butterfly" id="butterflyPreview">
+              <svg class="watercolor-butterfly" viewBox="0 0 360 300" aria-hidden="true">
+                <defs>
+                  <linearGradient id="wingWarm" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff3f2f" />
+                    <stop offset="34%" stop-color="#ff8a24" />
+                    <stop offset="58%" stop-color="#ffe45c" />
+                    <stop offset="78%" stop-color="#6bd5d0" />
+                    <stop offset="100%" stop-color="#9a63d8" />
+                  </linearGradient>
+                  <linearGradient id="bodyBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#6bd5d0" />
+                    <stop offset="46%" stop-color="#164f9e" />
+                    <stop offset="100%" stop-color="#9a63d8" />
+                  </linearGradient>
+                </defs>
+                <g class="svg-wing svg-wing-left">
+                  <path class="wing-fill" d="M176 136C116 34 42 24 18 39C50 78 22 116 57 154C91 191 137 164 176 146Z" />
+                  <path class="wing-fill lower" d="M176 153C126 170 63 158 49 213C67 249 110 286 147 279C154 231 170 190 181 156Z" />
+                  <path class="wing-vein" d="M176 144C132 116 91 72 38 43M169 151C118 152 83 167 55 210M167 143C135 130 111 124 82 132M158 164C127 190 110 222 96 262" />
+                  <circle class="wing-dot" cx="48" cy="54" r="5" />
+                  <circle class="wing-dot" cx="47" cy="90" r="6" />
+                  <circle class="wing-dot" cx="75" cy="260" r="5" />
+                </g>
+                <g class="svg-wing svg-wing-right">
+                  <path class="wing-fill" d="M184 136C244 34 318 24 342 39C310 78 338 116 303 154C269 191 223 164 184 146Z" />
+                  <path class="wing-fill lower" d="M184 153C234 170 297 158 311 213C293 249 250 286 213 279C206 231 190 190 179 156Z" />
+                  <path class="wing-vein" d="M184 144C228 116 269 72 322 43M191 151C242 152 277 167 305 210M193 143C225 130 249 124 278 132M202 164C233 190 250 222 264 262" />
+                  <circle class="wing-dot" cx="312" cy="54" r="5" />
+                  <circle class="wing-dot" cx="313" cy="90" r="6" />
+                  <circle class="wing-dot" cx="285" cy="260" r="5" />
+                </g>
+                <g class="svg-body">
+                  <path class="antenna" d="M174 103C154 58 133 58 129 80M186 103C206 58 227 58 231 80" />
+                  <ellipse cx="180" cy="124" rx="11" ry="14" />
+                  <ellipse cx="180" cy="161" rx="13" ry="34" />
+                  <path d="M171 193C176 219 184 219 189 193Z" />
+                </g>
+              </svg>
+            </div>
+          </div>
+          <p class="butterfly-note" id="butterflyNote">
+            It carries the feeling you shared, lightly.
+          </p>
+          <button class="primary-action" type="button" data-next="release">
+            Release
+          </button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="release">
+        <div class="screen-content">
+          <p class="eyebrow">Look toward the forest</p>
+          <h2>Explore the Forest</h2>
+          <div class="release-stage" aria-label="Butterfly release animation">
+            <span class="phone-light"></span>
+            <div class="release-butterfly">
+              <svg class="watercolor-butterfly" viewBox="0 0 360 300" aria-hidden="true">
+                <defs>
+                  <linearGradient id="releaseWingWarm" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff3f2f" />
+                    <stop offset="34%" stop-color="#ff8a24" />
+                    <stop offset="58%" stop-color="#ffe45c" />
+                    <stop offset="78%" stop-color="#6bd5d0" />
+                    <stop offset="100%" stop-color="#9a63d8" />
+                  </linearGradient>
+                  <linearGradient id="releaseBodyBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#6bd5d0" />
+                    <stop offset="46%" stop-color="#164f9e" />
+                    <stop offset="100%" stop-color="#9a63d8" />
+                  </linearGradient>
+                </defs>
+                <g class="svg-wing svg-wing-left">
+                  <path class="wing-fill" d="M176 136C116 34 42 24 18 39C50 78 22 116 57 154C91 191 137 164 176 146Z" />
+                  <path class="wing-fill lower" d="M176 153C126 170 63 158 49 213C67 249 110 286 147 279C154 231 170 190 181 156Z" />
+                  <path class="wing-vein" d="M176 144C132 116 91 72 38 43M169 151C118 152 83 167 55 210M167 143C135 130 111 124 82 132M158 164C127 190 110 222 96 262" />
+                </g>
+                <g class="svg-wing svg-wing-right">
+                  <path class="wing-fill" d="M184 136C244 34 318 24 342 39C310 78 338 116 303 154C269 191 223 164 184 146Z" />
+                  <path class="wing-fill lower" d="M184 153C234 170 297 158 311 213C293 249 250 286 213 279C206 231 190 190 179 156Z" />
+                  <path class="wing-vein" d="M184 144C228 116 269 72 322 43M191 151C242 152 277 167 305 210M193 143C225 130 249 124 278 132M202 164C233 190 250 222 264 262" />
+                </g>
+                <g class="svg-body">
+                  <path class="antenna" d="M174 103C154 58 133 58 129 80M186 103C206 58 227 58 231 80" />
+                  <ellipse cx="180" cy="124" rx="11" ry="14" />
+                  <ellipse cx="180" cy="161" rx="13" ry="34" />
+                  <path d="M171 193C176 219 184 219 189 193Z" />
+                </g>
+              </svg>
+            </div>
+          </div>
+          <p class="lead">
+            Your butterfly has flown into the forest. Try to move the butterfly
+            with your hand.
+          </p>
+          <p class="soft-hint" id="hutHint">The forest is waiting with you.</p>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="cabin">
+        <div class="screen-content cabin-layout">
+          <h2>If your butterfly enters a cabin...</h2>
+          <p class="lead">
+            Let the forest become quieter. A warm space is ready for your breath.
+          </p>
+          <button class="primary-action" type="button" data-next="breath">
+            Enter Cabin
+          </button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="breath">
+        <div class="screen-content center">
+          <div class="breath-visual" aria-label="Breathing guide">
+            <span></span>
+            <strong id="breathRate">10.8</strong>
+          </div>
+          <p class="rate-label">breaths per minute</p>
+          <p class="lead" id="breathCopy">
+            Let the breath become soft around the edges.<br />
+            You may sit down.
+          </p>
+          <button class="primary-action" type="button" id="transformButton">
+            Keep Breathing
+          </button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="memory">
+        <div class="screen-content memory-layout">
+          <p class="eyebrow">A color remains</p>
+          <h1>The forest remembers you</h1>
+          <p class="lead memory-copy" id="memoryText">
+            Your butterfly brightens the forest.
+          </p>
+          <div class="memory-card">
+            <span>A quiet trace</span>
+            <strong id="memoryTime">Today, 19:30</strong>
+          </div>
+          <button class="primary-action" type="button" id="saveButterflyButton">
+            Save Butterfly
+          </button>
+          <button class="secondary-action" type="button" data-next="welcome">
+            Return to the Beginning
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

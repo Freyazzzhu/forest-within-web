@@ -1,0 +1,160 @@
+:root {
+  color-scheme: light;
+  --paper: #f4efe6;
+  --paper-light: #faf6ee;
+  --ink: #3d332a;
+  --muted: #8b7e6e;
+  --ochre: #c89968;
+  --blue: #8fa3a8;
+  --moss: #9ba888;
+  --red: #c97b5c;
+  --lavender: #b5a6c9;
+  --mustard: #d4a84b;
+  --line: rgba(61, 51, 42, 0.42);
+  --font: "Cormorant Garamond", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(200, 153, 104, 0.11), transparent 24%),
+    radial-gradient(circle at 90% 88%, rgba(143, 163, 168, 0.12), transparent 24%),
+    #d9d0c3;
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+button {
+  font: inherit;
+}
+
+.projection-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(244, 239, 230, 0.9), rgba(244, 239, 230, 0.9)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='92' height='92' viewBox='0 0 92 92'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.83' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='92' height='92' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E");
+}
+
+#forestCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: none;
+}
+
+#gestureVideo,
+#gestureCanvas {
+  position: absolute;
+  right: 1rem;
+  bottom: 4.8rem;
+  width: 11rem;
+  height: 6.2rem;
+  border: 1px solid rgba(61, 51, 42, 0.28);
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.debug-camera #gestureVideo {
+  opacity: 0.36;
+}
+
+#gestureCanvas {
+  display: none;
+}
+
+.projection-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.status-line {
+  position: absolute;
+  left: 1.2rem;
+  top: 1rem;
+  display: flex;
+  gap: 0.7rem;
+  color: rgba(61, 51, 42, 0.48);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.caption {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: min(38rem, 80vw);
+  min-height: 4rem;
+  transform: translateX(-50%);
+  color: rgba(61, 51, 42, 0.86);
+  font-family: var(--font);
+  font-size: clamp(2.8rem, 4.8vw, 7rem);
+  font-weight: 300;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 0 10px 26px rgba(61, 51, 42, 0.06);
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.caption.is-visible {
+  opacity: 1;
+}
+
+.control-panel {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.45rem;
+  opacity: 0.48;
+  transition: opacity 180ms ease;
+}
+
+.control-panel:hover {
+  opacity: 1;
+}
+
+.control-panel button {
+  min-height: 2.25rem;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0 0.75rem;
+  background: rgba(250, 246, 238, 0.52);
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.control-panel button:hover {
+  background: rgba(250, 246, 238, 0.78);
+}
+
+@media (max-width: 900px) {
+  .control-panel {
+    left: 1rem;
+    right: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .control-panel button {
+    flex: 1 1 8rem;
+  }
+}

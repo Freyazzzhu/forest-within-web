@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forest Within Projection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="screen.css" />
+  </head>
+  <body>
+    <main class="projection-shell">
+      <canvas id="forestCanvas" aria-label="Forest Within projection scene"></canvas>
+
+      <video id="gestureVideo" playsinline muted></video>
+      <canvas id="gestureCanvas"></canvas>
+
+      <section class="projection-overlay" aria-live="polite">
+        <div class="status-line">
+          <span id="modeLabel">RESTING FOREST</span>
+          <span id="gestureLabel">POINTER</span>
+        </div>
+        <div class="caption" id="sceneCaption"></div>
+      </section>
+
+      <nav class="control-panel" aria-label="Projection controls">
+        <button type="button" id="cameraButton">Camera Gesture</button>
+        <button type="button" id="butterflyButton">Add Butterfly</button>
+        <button type="button" id="ritualButton">Ritual</button>
+        <button type="button" id="fullscreenButton">Fullscreen</button>
+      </nav>
+    </main>
+
+    <script src="screen.js"></script>
+  </body>
+</html>
