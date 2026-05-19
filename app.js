@@ -8,11 +8,12 @@ const hutHint = document.querySelector("#hutHint");
 const breathRate = document.querySelector("#breathRate");
 const breathCopy = document.querySelector("#breathCopy");
 const transformButton = document.querySelector("#transformButton");
+const breathCountdown = document.querySelector("#breathCountdown");
 const saveButterflyButton = document.querySelector("#saveButterflyButton");
 const memoryTime = document.querySelector("#memoryTime");
 const memoryText = document.querySelector("#memoryText");
 
-const flow = ["welcome", "emotion", "generating", "butterfly", "release", "cabin", "breath", "memory"];
+const flow = ["welcome", "emotion", "generating", "butterfly", "release", "cabin", "breath", "return", "memory"];
 const palettes = [
   ["#ff3f2f", "#ff8a24", "#ffe45c", "#6bd5d0", "#9a63d8", "#164f9e"],
   ["#2446ff", "#00a7ff", "#72f0dc", "#c9ff68", "#fff3a6", "#123b8c"],
@@ -34,8 +35,10 @@ let lastPaletteIndex = -1;
 let releaseTimer;
 let cabinTimer;
 let breathTimer;
+let countdownTimer;
+let returnTimer;
 let currentRate = 10.8;
-let breathClicks = 0;
+let secondsLeft = 60;
 
 function showScreen(name) {
   currentScreen = name;
@@ -49,7 +52,9 @@ function showScreen(name) {
 
   clearTimeout(releaseTimer);
   clearTimeout(cabinTimer);
+  clearTimeout(returnTimer);
   clearInterval(breathTimer);
+  clearInterval(countdownTimer);
 
   if (name === "release") {
     startReleaseHints();
@@ -61,6 +66,14 @@ function showScreen(name) {
 
   if (name === "memory") {
     writeMemory();
+  }
+
+  if (name === "return") {
+    returnTimer = setTimeout(() => {
+      if (currentScreen === "return") {
+        showScreen("memory");
+      }
+    }, 5000);
   }
 }
 
@@ -106,10 +119,10 @@ function applyButterflyPalette(colors) {
 }
 
 function startReleaseHints() {
-  hutHint.textContent = "The forest is waiting with you.";
+  hutHint.textContent = "The forest is waiting with you";
   releaseTimer = setTimeout(() => {
     if (currentScreen === "release") {
-      hutHint.textContent = "Keep your eyes on the butterfly.";
+      hutHint.textContent = "Keep your eyes on the butterfly";
     }
   }, 5000);
 
@@ -121,20 +134,33 @@ function startReleaseHints() {
 }
 
 function startBreathing() {
-  breathClicks = 0;
+  secondsLeft = 60;
   currentRate = 10.8;
+  breathCountdown.textContent = secondsLeft;
   breathRate.textContent = currentRate.toFixed(1);
-  transformButton.textContent = "Keep Breathing";
-  breathCopy.innerHTML = "Let the breath become soft around the edges.<br />You may sit down.";
+  transformButton.classList.remove("is-visible");
+  breathCopy.innerHTML = "Let the breath become soft around the edges<br />You may sit down";
 
   breathTimer = setInterval(() => {
     currentRate = Math.max(7.4, currentRate - 0.2);
     breathRate.textContent = currentRate.toFixed(1);
     if (currentRate <= 8.0) {
-      breathCopy.textContent = "The cabin is opening. Your butterfly can continue from here.";
-      transformButton.textContent = "Let It Rest";
+      revealRestButton();
     }
   }, 1800);
+
+  countdownTimer = setInterval(() => {
+    secondsLeft = Math.max(0, secondsLeft - 1);
+    breathCountdown.textContent = secondsLeft;
+    if (secondsLeft <= 0) {
+      revealRestButton();
+      clearInterval(countdownTimer);
+    }
+  }, 1000);
+}
+
+function revealRestButton() {
+  transformButton.classList.add("is-visible");
 }
 
 function writeMemory() {
@@ -145,7 +171,7 @@ function writeMemory() {
     minute: "2-digit",
   }).format(now);
 
-  memoryText.textContent = "Your butterfly brightens the forest.";
+  memoryText.textContent = "Your butterfly brightens the forest";
 }
 
 document.querySelectorAll("[data-next]").forEach((button) => {
@@ -168,13 +194,7 @@ generateButton.addEventListener("click", () => {
 });
 
 transformButton.addEventListener("click", () => {
-  breathClicks += 1;
-  currentRate = Math.max(7.2, currentRate - 1.1);
-  breathRate.textContent = currentRate.toFixed(1);
-
-  if (currentRate <= 8 || breathClicks >= 3) {
-    showScreen("memory");
-  }
+  showScreen("return");
 });
 
 butterflyPreview.addEventListener("click", () => {

@@ -53,18 +53,26 @@
               id="emotionInput"
               rows="5"
               maxlength="160"
-              placeholder="A word, a sentence, or a feeling that is still forming."
+              placeholder="A word, a sentence, or a feeling that is still forming"
             ></textarea>
           </label>
           <div class="chips" aria-label="Suggested feelings">
-            <button type="button" data-chip="A little tired">A little tired</button>
-            <button type="button" data-chip="Need stillness">Need stillness</button>
-            <button type="button" data-chip="Quietly happy">Quietly happy</button>
-            <button type="button" data-chip="Thinking of someone">Thinking of someone</button>
-            <button type="button" data-chip="Hard to explain">Hard to explain</button>
-            <button type="button" data-chip="Anxious">Anxious</button>
-            <button type="button" data-chip="Calm">Calm</button>
-            <button type="button" data-chip="Expectant">Expectant</button>
+            <div class="chip-row chip-row-3">
+              <button type="button" data-chip="A little tired">A little tired</button>
+              <button type="button" data-chip="Need stillness">Need stillness</button>
+              <button type="button" data-chip="Quietly happy">Quietly happy</button>
+            </div>
+            <div class="chip-row chip-row-3 chip-row-balanced">
+              <button type="button" data-chip="Thinking of someone">Thinking of someone</button>
+              <button type="button" data-chip="Hard to explain">Hard to explain</button>
+              <button type="button" data-chip="Anxious">Anxious</button>
+            </div>
+            <div class="chip-row chip-row-4">
+              <button type="button" data-chip="Sleepy">Sleepy</button>
+              <button type="button" data-chip="Missing">Missing</button>
+              <button type="button" data-chip="Calm">Calm</button>
+              <button type="button" data-chip="Expectant">Expectant</button>
+            </div>
           </div>
           <button class="primary-action" type="button" id="generateButton">
             Step into Forest
@@ -83,7 +91,7 @@
           <h2>A place is opening for you</h2>
           <p class="lead">
             Your words are becoming color, wing, and a quiet pattern of their
-            own.
+            own
           </p>
         </div>
       </section>
@@ -134,7 +142,7 @@
             </div>
           </div>
           <p class="butterfly-note" id="butterflyNote">
-            It carries the feeling you shared, lightly.
+            It carries the feeling you shared, lightly
           </p>
           <button class="primary-action" type="button" data-next="release">
             Release
@@ -184,10 +192,10 @@
             </div>
           </div>
           <p class="lead">
-            Your butterfly has flown into the forest. Try to move the butterfly
-            with your hand.
+            Your butterfly has flown into the forest<br />
+            Try to move the butterfly with your hand
           </p>
-          <p class="soft-hint" id="hutHint">The forest is waiting with you.</p>
+          <p class="soft-hint" id="hutHint">The forest is waiting with you</p>
         </div>
       </section>
 
@@ -195,7 +203,8 @@
         <div class="screen-content cabin-layout">
           <h2>If your butterfly enters a cabin...</h2>
           <p class="lead">
-            Let the forest become quieter. A warm space is ready for your breath.
+            Let the forest become quieter<br />
+            A warm space is ready for your breath
           </p>
           <button class="primary-action" type="button" data-next="breath">
             Enter Cabin
@@ -205,6 +214,8 @@
 
       <section class="screen" data-screen="breath">
         <div class="screen-content center">
+          <div class="breath-countdown" id="breathCountdown">60</div>
+          <h2 class="breath-title">Breath Slowly</h2>
           <div class="breath-visual" aria-label="Breathing guide">
             <span></span>
             <strong id="breathRate">10.8</strong>
@@ -212,11 +223,17 @@
           <p class="rate-label">breaths per minute</p>
           <p class="lead" id="breathCopy">
             Let the breath become soft around the edges.<br />
-            You may sit down.
+            You may sit down
           </p>
           <button class="primary-action" type="button" id="transformButton">
-            Keep Breathing
+            Let It Rest
           </button>
+        </div>
+      </section>
+
+      <section class="screen" data-screen="return">
+        <div class="screen-content return-layout">
+          <h1>Your butterfly<br />has returned to the forest</h1>
         </div>
       </section>
 
@@ -225,7 +242,7 @@
           <p class="eyebrow">A color remains</p>
           <h1>The forest remembers you</h1>
           <p class="lead memory-copy" id="memoryText">
-            Your butterfly brightens the forest.
+            Your butterfly brightens the forest
           </p>
           <div class="memory-card">
             <span>A quiet trace</span>
