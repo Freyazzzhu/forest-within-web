@@ -281,12 +281,23 @@ button {
 .cabin-layout {
   align-items: center;
   justify-content: center;
-  padding: 14vh 0 0;
+  padding: 0;
   text-align: center;
 }
 
 .cabin-layout .lead {
   margin-inline: auto;
+}
+
+[data-screen="cabin"] .cabin-layout {
+  gap: 1.35rem;
+  justify-content: center;
+  padding-top: 22vh;
+  transform: translateY(7vh);
+}
+
+[data-screen="cabin"] .primary-action {
+  margin-top: 2.5rem;
 }
 
 .return-layout h1 {
