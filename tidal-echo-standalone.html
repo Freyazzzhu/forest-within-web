@@ -1,0 +1,1086 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tidal Echo Standalone</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #364541;
+        --muted: rgba(54, 69, 65, 0.64);
+        --line: rgba(94, 126, 118, 0.18);
+        --panel: rgba(255, 255, 255, 0.7);
+        --tone: #79bfc3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        display: grid;
+        place-items: center;
+        min-height: 100dvh;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 14% 12%, rgba(150, 215, 195, 0.34), transparent 17rem),
+          radial-gradient(circle at 90% 10%, rgba(245, 189, 161, 0.34), transparent 18rem),
+          linear-gradient(150deg, #fff9ef, #e8f4ee 54%, #f9efe8);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button {
+        border: 0;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.42;
+      }
+
+      .app-shell {
+        position: relative;
+        width: min(100vw, 430px);
+        height: 100dvh;
+        min-height: 100dvh;
+        overflow: hidden;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.52) 34%, transparent),
+          #fbf7ee;
+        box-shadow: 0 22px 80px rgba(81, 103, 95, 0.14);
+      }
+
+      .app-shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(to bottom, transparent, rgba(116, 147, 137, 0.16), transparent) 17% 8% / 1px 78% no-repeat,
+          linear-gradient(to bottom, transparent, rgba(116, 147, 137, 0.12), transparent) 58% 6% / 1px 80% no-repeat,
+          linear-gradient(to bottom, transparent, rgba(116, 147, 137, 0.14), transparent) 88% 10% / 1px 72% no-repeat;
+        transform: skewX(-8deg);
+      }
+
+      .statusbar {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        gap: 0.52rem;
+        min-height: 4.35rem;
+        padding: max(1rem, env(safe-area-inset-top)) 1.15rem 0.65rem;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .statusbar span:last-child {
+        margin-left: auto;
+        color: rgba(54, 69, 65, 0.42);
+      }
+
+      .connection-dot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 50%;
+        background: #79bfc3;
+        box-shadow: 0 0 18px rgba(121, 191, 195, 0.72);
+      }
+
+      .view {
+        position: absolute;
+        inset: 4.35rem 0 0;
+        z-index: 2;
+        display: none;
+        padding: 0.72rem 1rem max(0.8rem, env(safe-area-inset-bottom));
+      }
+
+      .view.is-active {
+        display: block;
+        animation: viewIn 300ms ease both;
+      }
+
+      .view-body {
+        display: flex;
+        flex-direction: column;
+        height: calc(100dvh - 5.87rem);
+        min-height: 0;
+        gap: 0.72rem;
+        overflow: hidden;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(3.3rem, 18vw, 5.1rem);
+        line-height: 0.88;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        font-size: 1.05rem;
+        line-height: 1.15;
+      }
+
+      h3 {
+        font-size: 1rem;
+        line-height: 1.28;
+      }
+
+      .intro-view {
+        justify-content: space-between;
+        padding-top: 0.8rem;
+      }
+
+      .eyebrow {
+        margin: 0 0 0.8rem;
+        color: #d69b45;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .intro-copy {
+        max-width: 18rem;
+        margin-top: 1.15rem;
+        color: rgba(54, 69, 65, 0.76);
+        font-size: 1rem;
+        line-height: 1.45;
+      }
+
+      .guide-panel,
+      .scan-card,
+      .notice,
+      .saved-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 12px 36px rgba(120, 146, 138, 0.08);
+        backdrop-filter: blur(18px);
+      }
+
+      .guide-panel {
+        display: grid;
+        gap: 0.74rem;
+        padding: 0.92rem;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .step-list {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .step-list span {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        color: var(--ink);
+        font-size: 0.92rem;
+        font-weight: 700;
+      }
+
+      .step-list b {
+        display: grid;
+        place-items: center;
+        width: 1.9rem;
+        height: 1.9rem;
+        border-radius: 50%;
+        background: rgba(121, 191, 195, 0.14);
+        color: #65aeb1;
+      }
+
+      .scan-card {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 0.78rem;
+        color: rgba(54, 69, 65, 0.72);
+        font-weight: 700;
+      }
+
+      .qr-mark {
+        display: grid;
+        grid-template-columns: repeat(4, 0.55rem);
+        gap: 0.22rem;
+        padding: 0.42rem;
+        background: #fdfaf3;
+        border: 1px solid rgba(54, 69, 65, 0.14);
+      }
+
+      .qr-mark span {
+        width: 0.55rem;
+        height: 0.55rem;
+        background: #6d817a;
+      }
+
+      .qr-mark span:nth-child(2n),
+      .qr-mark span:nth-child(5),
+      .qr-mark span:nth-child(11) {
+        opacity: 0;
+      }
+
+      .bottom-actions {
+        display: grid;
+        gap: 0.5rem;
+        margin-top: auto;
+        flex: 0 0 auto;
+      }
+
+      .bottom-actions p {
+        color: rgba(54, 69, 65, 0.48);
+        font-size: 0.78rem;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .primary-button,
+      .secondary-button {
+        min-height: 3.35rem;
+        border-radius: 8px;
+        font-weight: 800;
+      }
+
+      .primary-button {
+        background: #435852;
+        color: #fffaf2;
+        box-shadow: 0 10px 24px rgba(67, 88, 82, 0.18);
+      }
+
+      .secondary-button {
+        border: 1px solid rgba(67, 88, 82, 0.18);
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .ghost-button,
+      .icon-button {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.64);
+      }
+
+      .ghost-button {
+        min-width: 4.2rem;
+        min-height: 2.3rem;
+        border-radius: 999px;
+        color: rgba(54, 69, 65, 0.78);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .page-nav {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 0.6rem;
+        min-height: 2.25rem;
+        flex: 0 0 auto;
+      }
+
+      .page-nav h2 {
+        text-align: center;
+      }
+
+      .page-nav strong {
+        color: #d69b45;
+        font-size: 0.72rem;
+        text-align: right;
+      }
+
+      .instrument-grid {
+        display: grid;
+        gap: 0.52rem;
+        flex: 0 0 auto;
+      }
+
+      .instrument-card {
+        display: grid;
+        grid-template-columns: 3.25rem 1fr;
+        align-items: center;
+        gap: 0.85rem;
+        width: 100%;
+        min-height: 4.25rem;
+        padding: 0.56rem 0.7rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.58);
+        text-align: left;
+      }
+
+      .instrument-card.is-selected {
+        border-color: color-mix(in srgb, var(--tone) 64%, white);
+        background: color-mix(in srgb, var(--tone) 16%, white);
+      }
+
+      .instrument-card .symbol,
+      .symbol-preview,
+      .mini-instrument span {
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(94, 126, 118, 0.16);
+        background: color-mix(in srgb, var(--tone) 16%, white);
+        color: var(--tone);
+      }
+
+      .instrument-card .symbol {
+        width: 3.1rem;
+        height: 3.1rem;
+        border-radius: 50%;
+        font-size: 1.55rem;
+      }
+
+      .instrument-card strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.98rem;
+      }
+
+      .instrument-card small {
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .symbol-preview {
+        align-self: center;
+        width: min(42vw, 8.8rem);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        font-size: 3.4rem;
+        flex: 0 0 auto;
+      }
+
+      .notice {
+        display: grid;
+        gap: 0.52rem;
+        padding: 0.82rem;
+        flex: 0 0 auto;
+      }
+
+      .notice p {
+        color: var(--muted);
+        font-size: 0.82rem;
+        line-height: 1.35;
+      }
+
+      .pattern-view,
+      .result-view {
+        gap: 0.85rem;
+      }
+
+      .canvas-wrap,
+      .result-stage,
+      .transition-stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        flex: 1;
+        min-height: 0;
+        border: 1px solid rgba(94, 126, 118, 0.18);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fffdf8;
+      }
+
+      .canvas-wrap canvas,
+      .result-stage canvas,
+      .transition-stage canvas,
+      .saved-card canvas {
+        width: 100%;
+        height: 100%;
+      }
+
+      .empty-state {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: rgba(54, 69, 65, 0.42);
+        font-weight: 800;
+        pointer-events: none;
+        text-transform: uppercase;
+      }
+
+      .empty-state.is-hidden {
+        display: none;
+      }
+
+      .mini-switcher,
+      .action-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .icon-button {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        color: rgba(54, 69, 65, 0.78);
+        font-size: 1.7rem;
+        line-height: 1;
+      }
+
+      .mini-instrument {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        min-height: 3.45rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.62);
+      }
+
+      .mini-instrument span {
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 50%;
+        font-size: 1.35rem;
+      }
+
+      .mini-instrument strong {
+        font-size: 0.88rem;
+      }
+
+      .transition-stage {
+        background:
+          radial-gradient(circle at 50% 42%, rgba(255, 178, 46, 0.18), transparent 10rem),
+          #fffdf8;
+      }
+
+      .light-location {
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.78rem 0.9rem;
+        border: 1px solid rgba(94, 126, 118, 0.16);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.84);
+        color: rgba(54, 69, 65, 0.76);
+        font-size: 0.82rem;
+      }
+
+      .light-location span {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+        background: var(--tone);
+        animation: lightPulse 1.2s ease-out infinite;
+      }
+
+      .ground-stage {
+        background:
+          radial-gradient(circle at 50% 50%, rgba(121, 191, 195, 0.12), transparent 12rem),
+          #fffdf8;
+      }
+
+      .saved-card {
+        flex: 1;
+        min-height: 0;
+        padding: 0.8rem;
+        background: #fffdf8;
+        overflow: hidden;
+      }
+
+      .center-copy {
+        text-align: center;
+      }
+
+      .action-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      @keyframes viewIn {
+        from {
+          opacity: 0.88;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes lightPulse {
+        0% {
+          box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 38%, transparent);
+          transform: scale(0.88);
+        }
+        80% {
+          box-shadow: 0 0 0 1rem transparent;
+          transform: scale(1.08);
+        }
+        100% {
+          box-shadow: 0 0 0 0 transparent;
+          transform: scale(0.88);
+        }
+      }
+
+      @media (max-height: 720px) {
+        .statusbar {
+          min-height: 3.55rem;
+          padding: max(0.72rem, env(safe-area-inset-top)) 1rem 0.42rem;
+        }
+
+        .view {
+          inset: 3.55rem 0 0;
+          padding: 0.48rem 0.95rem max(0.55rem, env(safe-area-inset-bottom));
+        }
+
+        .view-body {
+          height: calc(100dvh - 4.58rem);
+          gap: 0.48rem;
+        }
+
+        .page-nav {
+          min-height: 2rem;
+        }
+
+        .ghost-button {
+          min-width: 3.65rem;
+          min-height: 2rem;
+        }
+
+        .instrument-card {
+          grid-template-columns: 2.75rem 1fr;
+          min-height: 3.55rem;
+          padding: 0.42rem 0.58rem;
+        }
+
+        .instrument-card .symbol {
+          width: 2.55rem;
+          height: 2.55rem;
+          font-size: 1.28rem;
+        }
+
+        .symbol-preview {
+          width: min(30vw, 6.7rem);
+          font-size: 2.55rem;
+        }
+
+        .notice {
+          gap: 0.32rem;
+          padding: 0.66rem 0.72rem;
+        }
+
+        .notice p,
+        .bottom-actions p {
+          display: none;
+        }
+
+        .primary-button,
+        .secondary-button {
+          min-height: 2.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell" aria-live="polite">
+      <header class="statusbar">
+        <span class="connection-dot"></span>
+        <span>Connected to installation</span>
+        <span id="stepLabel">01 / 06</span>
+      </header>
+
+      <section class="view is-active" data-view="begin">
+        <div class="view-body intro-view">
+          <div>
+            <p class="eyebrow">Create Your Resonance</p>
+            <h1>Tidal Echo</h1>
+            <p class="intro-copy">Choose an instrument, tap a rhythm, and let the space answer with light and pattern.</p>
+          </div>
+          <div class="guide-panel">
+            <p>Your phone becomes the starting point of a shared sound, light, and ground projection.</p>
+            <div class="step-list">
+              <span><b>1</b>Choose an instrument</span>
+              <span><b>2</b>Tap your rhythm</span>
+              <span><b>3</b>Look up, then look down</span>
+            </div>
+          </div>
+          <div class="scan-card">
+            <div class="qr-mark" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <p>You have entered the experience</p>
+          </div>
+          <div class="bottom-actions">
+            <button class="primary-button" type="button" data-go="select">Begin</button>
+            <p>The experience will continue in the space around you.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="select">
+        <div class="view-body">
+          <nav class="page-nav">
+            <button class="ghost-button" type="button" data-go="begin">Back</button>
+            <h2>Choose Your Instrument</h2>
+          </nav>
+          <div class="instrument-grid" id="instrumentGrid"></div>
+          <div class="symbol-preview" id="symbolPreview"><span>△</span></div>
+          <section class="notice">
+            <h3>When you tap, one personal shape will keep changing.</h3>
+            <p id="instrumentHint">The rhythm controls the growth, spacing, and pulse of your pattern.</p>
+          </section>
+          <div class="bottom-actions">
+            <button class="primary-button" id="confirmButton" type="button">Start Tapping</button>
+            <p>Select one instrument to begin.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="pattern">
+        <div class="view-body pattern-view">
+          <nav class="page-nav">
+            <button class="ghost-button" type="button" data-reset-back>Back</button>
+            <h2>Your Echo</h2>
+            <strong id="tapCountLabel">0 taps</strong>
+          </nav>
+          <button class="canvas-wrap" id="tapSurface" type="button" aria-label="Tap to shape your echo">
+            <canvas id="patternCanvas" width="720" height="860"></canvas>
+            <span class="empty-state" id="emptyState">Tap your rhythm</span>
+          </button>
+          <div class="mini-switcher">
+            <button class="icon-button" type="button" data-shift="-1" aria-label="Previous instrument">‹</button>
+            <div class="mini-instrument"><span id="patternSymbol">△</span><strong id="patternInstrumentName">Wind Chime</strong></div>
+            <button class="icon-button" type="button" data-shift="1" aria-label="Next instrument">›</button>
+          </div>
+          <div class="bottom-actions">
+            <button class="primary-button" id="continueButton" type="button" disabled>Follow the Light</button>
+            <p>Tap at least three times to form your echo.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="lookup">
+        <div class="view-body result-view">
+          <nav class="page-nav">
+            <button class="ghost-button" type="button" data-go="pattern">Back</button>
+            <h2>Now look up</h2>
+          </nav>
+          <div class="transition-stage">
+            <canvas id="lightCanvas" width="620" height="680"></canvas>
+            <div class="light-location"><span></span><strong id="lightLocation">Light above you is pulsing</strong></div>
+          </div>
+          <section class="notice center-copy">
+            <h3>Follow the light.</h3>
+            <p>Your tapped melody is playing back while the light expands overhead.</p>
+          </section>
+          <div class="bottom-actions">
+            <button class="primary-button" id="lookDownButton" type="button">The melody ended</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="lookdown">
+        <div class="view-body result-view">
+          <nav class="page-nav">
+            <button class="ghost-button" type="button" data-go="lookup">Back</button>
+            <h2>Look down</h2>
+          </nav>
+          <div class="result-stage ground-stage"><canvas id="groundCanvas" width="680" height="760"></canvas></div>
+          <section class="notice center-copy">
+            <h3>Your pattern has reached the ground.</h3>
+            <p>It briefly glows, then joins the collective pattern made by everyone here.</p>
+          </section>
+          <div class="bottom-actions">
+            <button class="primary-button" type="button" data-go="card">Collect My Card</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="card">
+        <div class="view-body result-view">
+          <nav class="page-nav">
+            <button class="ghost-button" type="button" data-close>Close</button>
+            <h2>Your Card</h2>
+          </nav>
+          <div class="saved-card"><canvas id="cardCanvas" width="560" height="720"></canvas></div>
+          <section class="notice center-copy">
+            <h3>Scan to hear your rhythm.</h3>
+            <p>This card keeps the pattern and the melody you just made.</p>
+          </section>
+          <div class="action-row">
+            <button class="secondary-button" type="button" data-create-again>Create Again</button>
+            <button class="primary-button" type="button" data-close>Finish</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const views = Array.from(document.querySelectorAll(".view"));
+      const stepLabel = document.querySelector("#stepLabel");
+      const instrumentGrid = document.querySelector("#instrumentGrid");
+      const symbolPreview = document.querySelector("#symbolPreview");
+      const instrumentHint = document.querySelector("#instrumentHint");
+      const confirmButton = document.querySelector("#confirmButton");
+      const patternInstrumentName = document.querySelector("#patternInstrumentName");
+      const patternSymbol = document.querySelector("#patternSymbol");
+      const tapSurface = document.querySelector("#tapSurface");
+      const emptyState = document.querySelector("#emptyState");
+      const continueButton = document.querySelector("#continueButton");
+      const tapCountLabel = document.querySelector("#tapCountLabel");
+      const lookDownButton = document.querySelector("#lookDownButton");
+      const lightLocation = document.querySelector("#lightLocation");
+      const patternCanvas = document.querySelector("#patternCanvas");
+      const lightCanvas = document.querySelector("#lightCanvas");
+      const groundCanvas = document.querySelector("#groundCanvas");
+      const cardCanvas = document.querySelector("#cardCanvas");
+
+      const instruments = [
+        { id: "wind", name: "Wind Chime", symbol: "△", label: "Light / Airy", tone: "#79BFC3", frequency: 820 },
+        { id: "bowl", name: "Singing Bowl", symbol: "◖", label: "Calm / Grounding", tone: "#FFB22E", frequency: 220 },
+        { id: "handpan", name: "Handpan", symbol: "○", label: "Warm / Flowing", tone: "#75A9E5", frequency: 440 },
+      ];
+      const palette = ["#75A9E5", "#FFB22E", "#FF4A22", "#79BFC3", "#A7BA8B", "#F27A96", "#D8B8E4"];
+      const steps = { begin: "01 / 06", select: "02 / 06", pattern: "03 / 06", lookup: "04 / 06", lookdown: "05 / 06", card: "06 / 06" };
+
+      let currentView = "begin";
+      let selectedIndex = 0;
+      let taps = [];
+      let lastTap = 0;
+      let audioContext;
+      let lightFrame;
+
+      function showView(name) {
+        currentView = name;
+        views.forEach((view) => view.classList.toggle("is-active", view.dataset.view === name));
+        stepLabel.textContent = steps[name] || "01 / 06";
+        cancelAnimationFrame(lightFrame);
+        if (name === "pattern") drawPattern();
+        if (name === "lookup") startLightPlayback();
+        if (name === "lookdown") drawGround();
+        if (name === "card") drawCard();
+      }
+
+      function currentInstrument() {
+        return instruments[selectedIndex];
+      }
+
+      function selectInstrument(index) {
+        selectedIndex = (index + instruments.length) % instruments.length;
+        const instrument = currentInstrument();
+        document.documentElement.style.setProperty("--tone", instrument.tone);
+        symbolPreview.innerHTML = `<span>${instrument.symbol}</span>`;
+        symbolPreview.style.setProperty("--tone", instrument.tone);
+        instrumentHint.textContent = `${instrument.name} will shape one evolving mark. Your rhythm controls its layers and pulse.`;
+        patternInstrumentName.textContent = instrument.name;
+        patternSymbol.textContent = instrument.symbol;
+        patternSymbol.parentElement.style.setProperty("--tone", instrument.tone);
+        document.querySelectorAll(".instrument-card").forEach((card, cardIndex) => card.classList.toggle("is-selected", cardIndex === selectedIndex));
+      }
+
+      function renderInstrumentCards() {
+        instrumentGrid.innerHTML = instruments
+          .map(
+            (instrument, index) => `
+              <button class="instrument-card" type="button" data-instrument="${index}" style="--tone: ${instrument.tone}">
+                <span class="symbol">${instrument.symbol}</span>
+                <span><strong>${instrument.name}</strong><small>${instrument.label}</small></span>
+              </button>
+            `,
+          )
+          .join("");
+        instrumentGrid.querySelectorAll("[data-instrument]").forEach((card) => card.addEventListener("click", () => selectInstrument(Number(card.dataset.instrument))));
+      }
+
+      function playTone(instrument, delay = 0, length = 0.58) {
+        audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime + delay;
+        const ratio = instrument.id === "wind" ? 1.24 : instrument.id === "handpan" ? 0.86 : 0.64;
+        oscillator.type = instrument.id === "wind" ? "sine" : "triangle";
+        oscillator.frequency.setValueAtTime(instrument.frequency * ratio, now);
+        oscillator.frequency.exponentialRampToValueAtTime(instrument.frequency * 0.72, now + length);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.13, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
+        oscillator.connect(gain).connect(audioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + length + 0.04);
+      }
+
+      function addTap() {
+        const now = performance.now();
+        const gap = lastTap ? Math.min(1600, Math.max(180, now - lastTap)) : 620;
+        lastTap = now;
+        taps.push(gap);
+        if (taps.length > 12) taps.shift();
+        playTone(currentInstrument(), 0, Math.max(0.32, Math.min(0.9, gap / 1300)));
+        emptyState.classList.add("is-hidden");
+        continueButton.disabled = taps.length < 3;
+        tapCountLabel.textContent = `${taps.length} tap${taps.length === 1 ? "" : "s"}`;
+        drawPattern();
+      }
+
+      function paintBase(ctx, canvas, color = "#fffdf8") {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function roundedRect(ctx, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        ctx.lineTo(x + r, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function tapEnergy(index) {
+        const gap = taps[index] || 620;
+        return 1.18 - Math.min(1, gap / 1600) * 0.5;
+      }
+
+      function drawDot(ctx, x, y, r, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawPersonalMotif(ctx, canvas, scale = 1, options = {}) {
+        const count = Math.max(taps.length, options.preview ? 5 : 1);
+        const cx = options.x ?? canvas.width / 2;
+        const cy = options.y ?? canvas.height / 2;
+        const base = Math.min(canvas.width || 560, canvas.height || 560) * 0.19 * scale;
+        const instrument = currentInstrument();
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate((count % 8) * 0.08);
+
+        if (instrument.id === "wind") {
+          const petals = Math.min(12, 4 + count);
+          for (let i = 0; i < petals; i += 1) {
+            const energy = tapEnergy(i % taps.length);
+            ctx.save();
+            ctx.rotate((Math.PI * 2 * i) / petals);
+            ctx.fillStyle = palette[(i + selectedIndex) % palette.length];
+            roundedRect(ctx, -base * 0.16, -base * 0.9 * energy, base * 0.32, base * 0.72 * energy, base * 0.16);
+            ctx.fill();
+            ctx.restore();
+          }
+          drawDot(ctx, 0, 0, base * 0.2, "#FF4A22");
+        }
+
+        if (instrument.id === "bowl") {
+          for (let i = 0; i < Math.min(7, count + 2); i += 1) {
+            const energy = tapEnergy(i % taps.length);
+            const radius = base * (0.48 + i * 0.13);
+            ctx.fillStyle = palette[(i * 2 + 1) % palette.length];
+            ctx.beginPath();
+            ctx.arc(0, base * 0.08, radius * energy, Math.PI, 0);
+            ctx.lineTo(radius * energy, base * 0.42 + i * 2);
+            ctx.lineTo(-radius * energy, base * 0.42 + i * 2);
+            ctx.closePath();
+            ctx.fill();
+          }
+          ctx.fillStyle = "#fffdf8";
+          ctx.beginPath();
+          ctx.arc(0, -base * 0.08, base * 0.38, 0, Math.PI * 2);
+          ctx.fill();
+          drawDot(ctx, base * 0.46, -base * 0.18, base * 0.2, "#FFB22E");
+        }
+
+        if (instrument.id === "handpan") {
+          const lobes = Math.min(10, 4 + count);
+          for (let i = 0; i < lobes; i += 1) {
+            const energy = tapEnergy(i % taps.length);
+            ctx.save();
+            ctx.rotate((Math.PI * 2 * i) / lobes);
+            ctx.fillStyle = palette[(i + 2) % palette.length];
+            ctx.beginPath();
+            ctx.arc(0, -base * 0.52, base * 0.34 * energy, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          ctx.fillStyle = "#fffdf8";
+          ctx.beginPath();
+          ctx.arc(0, 0, base * 0.42, 0, Math.PI * 2);
+          ctx.fill();
+          drawDot(ctx, 0, 0, base * 0.22, "#75A9E5");
+        }
+
+        taps.forEach((gap, i) => {
+          const angle = (Math.PI * 2 * i) / Math.max(taps.length, 1) - Math.PI / 2;
+          const distance = base * (1.04 + Math.min(gap, 1200) / 1800);
+          drawDot(ctx, Math.cos(angle) * distance, Math.sin(angle) * distance, base * (0.045 + tapEnergy(i) * 0.035), palette[(i + 3) % palette.length]);
+        });
+        ctx.restore();
+      }
+
+      function drawPattern() {
+        const ctx = patternCanvas.getContext("2d");
+        paintBase(ctx, patternCanvas);
+        drawPersonalMotif(ctx, patternCanvas, 1.1);
+      }
+
+      function playBackRhythm() {
+        let delay = 0;
+        taps.forEach((gap) => {
+          delay += Math.min(0.9, gap / 1100);
+          playTone(currentInstrument(), delay, Math.max(0.28, Math.min(0.72, gap / 1600)));
+        });
+      }
+
+      function startLightPlayback() {
+        const instrument = currentInstrument();
+        lightLocation.textContent = instrument.id === "wind" ? "Front-left light is pulsing" : instrument.id === "bowl" ? "Center light is widening" : "Right-side light is blooming";
+        playBackRhythm();
+        const ctx = lightCanvas.getContext("2d");
+        const start = performance.now();
+        const rhythm = taps.length ? taps : [620, 620, 620];
+        function frame(time) {
+          const elapsed = time - start;
+          const beat = rhythm[Math.floor(elapsed / 420) % rhythm.length];
+          const pulse = 0.55 + (1 - Math.min(beat, 1500) / 1500) * 0.55 + Math.sin(elapsed / 130) * 0.08;
+          paintBase(ctx, lightCanvas, "#fffaf0");
+          ctx.save();
+          ctx.translate(lightCanvas.width / 2, lightCanvas.height / 2);
+          for (let i = 4; i >= 0; i -= 1) {
+            ctx.globalAlpha = 0.08 + i * 0.05;
+            ctx.fillStyle = palette[(i + selectedIndex) % palette.length];
+            ctx.beginPath();
+            ctx.arc(0, 0, (70 + i * 44) * pulse, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+          if (currentView === "lookup") lightFrame = requestAnimationFrame(frame);
+        }
+        lightFrame = requestAnimationFrame(frame);
+      }
+
+      function drawGround() {
+        const ctx = groundCanvas.getContext("2d");
+        paintBase(ctx, groundCanvas);
+        const smallPatterns = [
+          { x: 0.22, y: 0.23, s: 0.38, inst: 2 },
+          { x: 0.74, y: 0.26, s: 0.34, inst: 0 },
+          { x: 0.28, y: 0.72, s: 0.32, inst: 1 },
+          { x: 0.76, y: 0.72, s: 0.36, inst: 2 },
+        ];
+        const original = selectedIndex;
+        smallPatterns.forEach((item) => {
+          selectedIndex = item.inst;
+          drawPersonalMotif(ctx, groundCanvas, item.s, { preview: true, x: groundCanvas.width * item.x, y: groundCanvas.height * item.y });
+        });
+        selectedIndex = original;
+        ctx.save();
+        ctx.shadowColor = currentInstrument().tone;
+        ctx.shadowBlur = 28;
+        drawPersonalMotif(ctx, groundCanvas, 0.78);
+        ctx.restore();
+      }
+
+      function drawQr(ctx, x, y, size) {
+        ctx.fillStyle = "#fffdf8";
+        ctx.fillRect(x, y, size, size);
+        ctx.strokeStyle = "rgba(54, 69, 65, 0.28)";
+        ctx.strokeRect(x, y, size, size);
+        const cell = size / 7;
+        for (let row = 0; row < 7; row += 1) {
+          for (let col = 0; col < 7; col += 1) {
+            if ((row * 3 + col * 5 + taps.length) % 4 === 0 || (row < 2 && col < 2) || (row > 4 && col > 4)) {
+              ctx.fillStyle = "#435852";
+              ctx.fillRect(x + col * cell + 2, y + row * cell + 2, cell - 4, cell - 4);
+            }
+          }
+        }
+      }
+
+      function drawCard() {
+        const ctx = cardCanvas.getContext("2d");
+        paintBase(ctx, cardCanvas);
+        ctx.fillStyle = "rgba(121, 191, 195, 0.11)";
+        roundedRect(ctx, 34, 34, cardCanvas.width - 68, cardCanvas.height - 68, 20);
+        ctx.fill();
+        ctx.fillStyle = "#364541";
+        ctx.font = "800 28px Inter, sans-serif";
+        ctx.fillText("Tidal Echo", 58, 86);
+        ctx.font = "700 16px Inter, sans-serif";
+        ctx.fillStyle = "rgba(54, 69, 65, 0.58)";
+        ctx.fillText(`${currentInstrument().name} · ${taps.length} taps`, 58, 116);
+        drawPersonalMotif(ctx, cardCanvas, 0.82);
+        drawQr(ctx, cardCanvas.width - 154, cardCanvas.height - 178, 96);
+        ctx.fillStyle = "rgba(54, 69, 65, 0.62)";
+        ctx.font = "700 14px Inter, sans-serif";
+        ctx.fillText("Scan to hear your rhythm", 58, cardCanvas.height - 106);
+      }
+
+      function resetPattern() {
+        taps = [];
+        lastTap = 0;
+        continueButton.disabled = true;
+        tapCountLabel.textContent = "0 taps";
+        emptyState.classList.remove("is-hidden");
+        drawPattern();
+      }
+
+      document.querySelectorAll("[data-go]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.go)));
+      document.querySelectorAll("[data-shift]").forEach((button) => button.addEventListener("click", () => selectInstrument(selectedIndex + Number(button.dataset.shift))));
+      document.querySelectorAll("[data-close]").forEach((button) => {
+        button.addEventListener("click", () => {
+          resetPattern();
+          showView("begin");
+        });
+      });
+      document.querySelectorAll("[data-create-again]").forEach((button) => {
+        button.addEventListener("click", () => {
+          resetPattern();
+          showView("pattern");
+        });
+      });
+      document.querySelector("[data-reset-back]").addEventListener("click", () => {
+        resetPattern();
+        showView("select");
+      });
+      confirmButton.addEventListener("click", () => {
+        resetPattern();
+        showView("pattern");
+      });
+      tapSurface.addEventListener("click", addTap);
+      continueButton.addEventListener("click", () => showView("lookup"));
+      lookDownButton.addEventListener("click", () => showView("lookdown"));
+      renderInstrumentCards();
+      selectInstrument(0);
+      resetPattern();
+    </script>
+  </body>
+</html>
